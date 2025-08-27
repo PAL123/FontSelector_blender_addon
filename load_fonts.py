@@ -63,6 +63,33 @@ def get_os_folders(debug):
     print("FONTSELECTOR --- OS not supported")
     
 
+
+
+# --- Custom wrapper to append custom_font_folder (added, non-destructive) ---
+try:
+    _original_get_os_folders = get_os_folders
+    def get_os_folders(debug):
+        folders = _original_get_os_folders(debug) or []
+        try:
+            from .addon_prefs import get_addon_preferences
+            prefs = get_addon_preferences()
+            if prefs:
+                custom = getattr(prefs, "custom_font_folder", "") or ""
+                if custom:
+                    try:
+                        custom = bpy.path.abspath(custom)
+                    except Exception:
+                        pass
+                    if isinstance(custom, str) and os.path.isdir(custom):
+                        folders.append(custom)
+        except Exception:
+            # non-fatal
+            pass
+        return folders
+except Exception:
+    # If anything goes wrong, we keep the original behavior
+    pass
+
 def get_folder_size(start_path):
     
     total_size = 0

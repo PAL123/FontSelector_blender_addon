@@ -3,6 +3,14 @@ import os
 
 
 class FONTSELECTOR_PF_addon_prefs(bpy.types.AddonPreferences) :
+
+    # --- Custom: additional font folder (added) ---
+    custom_font_folder: bpy.props.StringProperty(
+        name="Custom Font Folder",
+        description="Zusätzlicher Ordner, der beim Font-Scan berücksichtigt wird",
+        subtype="DIR_PATH",
+        default="",
+    )
     bl_idname = __package__
     
     preferences_folder: bpy.props.StringProperty(
@@ -38,6 +46,7 @@ class FONTSELECTOR_PF_addon_prefs(bpy.types.AddonPreferences) :
     def draw(self, context) :
         layout = self.layout
         
+        layout.prop(self, "custom_font_folder")
         row = layout.row()
         row.prop(self, "preferences_folder", text="Preferences")
         sub = row.row()
