@@ -381,7 +381,9 @@ def reload_font_families_collections(
 
         for font in font_datas["families"][family]:
             new_font = new_family.fonts.add()
-            new_font.name = font["type"]
+            if not font.get("type"):
+                print(f"[FontSelector] Missing 'type' in font: {font}")
+            new_font.name = font.get("type") or "Unknown"
             new_font.filepath = font["filepath"]
             new_font.font_name = font["name"]
 
