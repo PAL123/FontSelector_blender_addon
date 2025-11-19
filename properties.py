@@ -206,21 +206,34 @@ def change_strips_font(
     self.relink_family_name = family_name
     self.relink_type_name = self.family_types
     
-    # Change selected objects
-    for strip in context.selected_sequences:
-        if strip.type == "TEXT":
-            
-            if strip == active_strip:
-                continue
-            
-            strip.font = target_font
-            
-            props = strip.fontselector_object_properties
-            props.family_index = self.family_index
-            props.family_types = self.family_types
+    # Change selected strips (Blender 5.0 compatible)
+    seq_editor = getattr(context.scene, "sequence_editor", None)
+    if seq_editor:
+        # Blender 4.x: sequences_all
+        strips = getattr(seq_editor, "sequences_all", None)
+        
+        # Blender 5.x: sequences_all exists but is now a CollectionProperty
+        if strips is None:
+            strips = getattr(seq_editor, "sequences_all", [])
 
-            props.relink_family_name = family_name
-            props.relink_type_name = self.family_types
+        # If strips is a dictionary (Blender 5.x internal) -> use values()
+        if isinstance(strips, dict):
+            strips = strips.values()
+        
+        for strip in strips:
+            if getattr(strip, "select", False) and getattr(strip, "type", "") == "TEXT":
+                
+                if strip == active_strip:
+                    continue
+
+                strip.font = target_font
+
+                props = strip.fontselector_object_properties
+                props.family_index = self.family_index
+                props.family_types = self.family_types
+
+                props.relink_family_name = family_name
+                props.relink_type_name = self.family_types
 
     font_props.no_callback = False
 
