@@ -56,8 +56,6 @@ def get_os_folders(debug):
             os.path.join(user_path, r"Library/Fonts/"),
             r"/Library/Fonts",
             r"/System/Library/Fonts",
-            r"/System Folder/Fonts/",
-            r"/Network/Library/Fonts/",
         ]
     
     print("FONTSELECTOR --- OS not supported")
