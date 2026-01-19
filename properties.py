@@ -57,6 +57,7 @@ class FONTSELECTOR_PR_font_family_properties(bpy.types.PropertyGroup):
     favorite: bpy.props.BoolProperty(
         name = "Favorite",
         update = favorite_callback,
+        options = {"HIDDEN",},
     )
     fonts : bpy.props.CollectionProperty(
         type=FONTSELECTOR_PR_single_font_properties,
@@ -68,6 +69,7 @@ class FONTSELECTOR_PR_properties(bpy.types.PropertyGroup):
 
     font_families : bpy.props.CollectionProperty(
         type = FONTSELECTOR_PR_font_family_properties,
+        options = {"HIDDEN",},
     )
     remove_existing_type_fonts : bpy.props.BoolProperty(
         name = "Remove Blender Type Fonts",
@@ -197,6 +199,10 @@ def change_strips_font(
     # Prevent callback
     font_props.no_callback = True
     
+    # Prevent no active strip
+    if active_strip is None:
+        return False
+
     # Change active font
     active_strip.font = target_font
 
@@ -206,15 +212,18 @@ def change_strips_font(
     self.relink_family_name = family_name
     self.relink_type_name = self.family_types
     
-    # Change selected strips (Blender 5.0 compatible)
-    seq_editor = getattr(context.scene, "sequence_editor", None)
-    if seq_editor:
-        # Blender 4.x: sequences_all
-        strips = getattr(seq_editor, "sequences_all", None)
-        
-        # Blender 5.x: sequences_all exists but is now a CollectionProperty
-        if strips is None:
-            strips = getattr(seq_editor, "sequences_all", [])
+    # Change selected objects
+    for strip in context.selected_strips:
+        if strip.type == "TEXT":
+            
+            if strip == active_strip:
+                continue
+            
+            strip.font = target_font
+            
+            props = strip.fontselector_object_properties
+            props.family_index = self.family_index
+            props.family_types = self.family_types
 
         # If strips is a dictionary (Blender 5.x internal) -> use values()
         if isinstance(strips, dict):
